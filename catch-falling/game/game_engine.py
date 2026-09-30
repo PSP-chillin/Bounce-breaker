@@ -18,6 +18,7 @@ from game.renderer import WIDTH, HEIGHT
 
 SPAWN_INTERVAL_FRAMES = 50
 MAX_MISSES = 5
+MAX_OBJECTS_ON_SCREEN = 8
 
 
 class GameEngine:
@@ -29,23 +30,46 @@ class GameEngine:
         self.misses = 0
         self.game_over = False
 
+    def _choose_spawn_x(self):
+        margin = 30
+        min_x = margin
+        max_x = WIDTH - margin
+
+        if not self.objects:
+            return random.randint(min_x, max_x)
+
+        for _ in range(200):
+            candidate = random.randint(min_x, max_x)
+            if all(abs(candidate - obj.x) > 60 for obj in self.objects):
+                return candidate
+
+        return random.randint(min_x, max_x)
+
     def _spawn_object(self):
-        x = random.randint(20, WIDTH - 20)
-        self.objects.append(FallingObject(x=x, y=-14, speed=3))
+        if len(self.objects) >= MAX_OBJECTS_ON_SCREEN:
+            return
+
+        x = self._choose_spawn_x()
+        speed = random.randint(3, 5) * 0.75
+        self.objects.append(FallingObject(x=x, y=-14, speed=speed))
 
     def handle_input(self, keys_pressed):
         if self.game_over:
             return
+
+        move_speed = self.basket.current_speed
+
         if keys_pressed[pygame.K_LEFT]:
-            self.basket.x -= self.basket.speed
+            self.basket.x -= move_speed
         if keys_pressed[pygame.K_RIGHT]:
-            self.basket.x += self.basket.speed
-        # Boundary handling: only clamps against the screen edges, not
-        # accounting for the basket's own width - it can hang half off
-        # either side of the screen.
-        self.basket.x = max(0, min(WIDTH, self.basket.x))
+            self.basket.x += move_speed
+
+        half_width = self.basket.width / 2
+        self.basket.x = max(half_width, min(WIDTH - half_width, self.basket.x))
 
     def handle_keydown(self, key):
+        if key == pygame.K_SPACE:
+            self.basket.activate_boost()
         if self.game_over and key == pygame.K_r:
             self.__init__()
 
@@ -53,23 +77,29 @@ class GameEngine:
         if self.game_over:
             return
 
+        self.basket.update_boost()
         self.frames_until_spawn -= 1
         if self.frames_until_spawn <= 0:
             self._spawn_object()
-            self.frames_until_spawn = SPAWN_INTERVAL_FRAMES
+            if len(self.objects) < MAX_OBJECTS_ON_SCREEN:
+                self.frames_until_spawn = random.randint(20, 60)
+            else:
+                self.frames_until_spawn = 10
 
         for obj in self.objects:
             obj.update()
 
         basket_rect = self.basket.get_rect()
-        for obj in self.objects:                  # BUG: mutating this list while iterating over it
-            if is_caught(basket_rect, obj):
-                self.score += 1
-                self.objects.remove(obj)
+        caught_objects = [
+            obj for obj in self.objects if is_caught(basket_rect, obj)]
+        self.objects = [
+            obj for obj in self.objects if not is_caught(basket_rect, obj)]
+        self.score += len(caught_objects)
 
         missed = [o for o in self.objects if o.is_past_bottom(HEIGHT)]
         if missed:
-            self.objects = [o for o in self.objects if not o.is_past_bottom(HEIGHT)]
+            self.objects = [
+                o for o in self.objects if not o.is_past_bottom(HEIGHT)]
             self.misses += len(missed)
             if self.misses >= MAX_MISSES:
                 self.game_over = True
@@ -78,7 +108,16 @@ class GameEngine:
         from game import renderer
         renderer.draw_scene(surface, self.basket, self.objects)
         renderer.draw_text(surface, font, f"Score: {self.score}", (10, 10))
-        renderer.draw_text(surface, font, f"Misses: {self.misses}/{MAX_MISSES}", (10, 36))
+        renderer.draw_text(
+            surface, font, f"Misses: {self.misses}/{MAX_MISSES}", (10, 36))
+
+        if self.basket.boosted_frames > 0:
+            renderer.draw_text(surface, font, "BOOST!",
+                               (10, 62), (80, 255, 180))
+        else:
+            renderer.draw_text(surface, font, "Normal speed",
+                               (10, 62), (220, 220, 220))
 
         if self.game_over:
-            renderer.draw_banner(surface, font, f"Game Over! Final score: {self.score}. Press R to restart.")
+            renderer.draw_banner(
+                surface, font, f"Game Over! Final score: {self.score}. Press R to restart.")

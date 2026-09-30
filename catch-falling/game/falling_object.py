@@ -8,7 +8,7 @@ class FallingObject:
         self.x = x
         self.y = y
         self.radius = radius
-        self.speed = speed
+        self.speed = speed * 0.75
         self.color = color
 
     def update(self):
