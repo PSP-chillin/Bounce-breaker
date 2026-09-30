@@ -93,7 +93,8 @@ class GameEngine:
         cracked_this_frame = []
         for obj in self.objects:
             if is_caught(basket_rect, obj):
-                obj.bounce()
+                break_direction = -1 if obj.x < self.basket.x else 1
+                obj.bounce(break_direction)
                 self.score += 1
                 if obj.cracked:
                     cracked_this_frame.append(obj)

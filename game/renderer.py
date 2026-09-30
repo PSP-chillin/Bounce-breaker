@@ -19,14 +19,19 @@ def draw_scene(surface, basket, objects, cracked_objects=None):
         pygame.draw.circle(surface, obj.color, center, obj.radius)
         if obj.cracked:
             pygame.draw.line(
-                surface, (245, 245, 245),
+                surface, (20, 20, 20),
                 (center[0] - obj.radius // 2, center[1] - obj.radius // 2),
-                (center[0] + obj.radius // 3, center[1]), 2,
+                (center[0], center[1] - obj.radius // 5), 2,
             )
             pygame.draw.line(
-                surface, (245, 245, 245),
-                (center[0] + obj.radius // 3, center[1]),
-                (center[0] - obj.radius // 3, center[1] + obj.radius // 2), 2,
+                surface, (20, 20, 20),
+                (center[0], center[1] - obj.radius // 5),
+                (center[0] - obj.radius // 4, center[1] + obj.radius // 2), 2,
+            )
+            pygame.draw.line(
+                surface, (20, 20, 20),
+                (center[0], center[1] - obj.radius // 5),
+                (center[0] + obj.radius // 2, center[1] + obj.radius // 3), 2,
             )
 
     pygame.draw.rect(surface, COLOR_BASKET, basket.get_rect(), border_radius=6)

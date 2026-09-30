@@ -8,6 +8,7 @@ class FallingObject:
         self.radius = radius
         self.speed = speed
         self.color = color
+        self.velocity_x = 0.0
         self.velocity_y = speed
         self.gravity = 0.02
         self.bounce_count = 0
@@ -17,23 +18,24 @@ class FallingObject:
     def is_contactable(self):
         return not self.cracked
 
-    def bounce(self):
+    def bounce(self, break_direction=1):
         self.bounce_count += 1
         if self.bounce_count >= 3:
-            self.crack()
+            self.crack(break_direction)
             return
 
         self.velocity_y = -max(3.5, self.speed * 1.2)
 
-    def crack(self):
+    def crack(self, direction=1):
         self.cracked = True
-        self.velocity_y = max(2.0, self.speed)
-        self.color = (130, 130, 130)
+        break_speed = max(2.0, self.speed)
+        self.velocity_x = abs(break_speed) * direction
+        self.velocity_y = break_speed
 
     def update(self):
         if self.cracked:
+            self.x += self.velocity_x
             self.y += self.velocity_y
-            self.velocity_y += self.gravity
             return
 
         self.velocity_y += self.gravity
