@@ -1,6 +1,6 @@
 # Bounce Breaker
 
-Bounce Breaker is a Pygame game in which the player moves a rectangular bar to juggle bouncing objects. The score is affected by the object's shape, speed, and score value. The project builds on the original college assignment in `catch-falling/`.
+Bounce Breaker is a Pygame game in which the player moves a rectangular bar to juggle bouncing objects. The score is affected by the object's shape, speed, and score value.
 
 ## Run the game
 
@@ -19,6 +19,4 @@ Controls: use the Left and Right arrow keys to move the bar.
 main.py                 Current Bounce Breaker entry point
 requirements.txt        Python dependencies
 game/                   Current game implementation
-catch-falling/          Original assignment copy
-code_update.md          Assignment code-update deliverable
 ```
