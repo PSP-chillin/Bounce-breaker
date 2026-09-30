@@ -6,7 +6,7 @@ import pygame
 
 
 class Basket:
-    def __init__(self, x, y, width=90, height=24, speed=5):
+    def __init__(self, x, y, width=120, height=24, speed=7.5):
         self.x = x
         self.y = y
         self.width = width

@@ -15,13 +15,14 @@ from game.renderer import WIDTH, HEIGHT
 
 SPAWN_INTERVAL_FRAMES = 50
 MAX_MISSES = 5
-MAX_OBJECTS_ON_SCREEN = 8
+MAX_OBJECTS_ON_SCREEN = 3
 
 
 class GameEngine:
     def __init__(self):
         self.basket = Basket(x=WIDTH / 2, y=HEIGHT - 30)
         self.objects = []
+        self.cracked_objects = []
         self.frames_until_spawn = 0
         self.score = 0
         self.misses = 0
@@ -85,25 +86,47 @@ class GameEngine:
 
         for obj in self.objects:
             obj.update()
+        for obj in self.cracked_objects:
+            obj.update()
 
         basket_rect = self.basket.get_rect()
-        caught_objects = [
-            obj for obj in self.objects if is_caught(basket_rect, obj)]
-        self.objects = [
-            obj for obj in self.objects if not is_caught(basket_rect, obj)]
-        self.score += len(caught_objects)
+        cracked_this_frame = []
+        for obj in self.objects:
+            if is_caught(basket_rect, obj):
+                obj.bounce()
+                self.score += 1
+                if obj.cracked:
+                    cracked_this_frame.append(obj)
+
+        if cracked_this_frame:
+            self.objects = [
+                obj for obj in self.objects if obj not in cracked_this_frame
+            ]
+            self.cracked_objects.extend(cracked_this_frame)
+            for _ in cracked_this_frame:
+                self._spawn_object()
 
         missed = [o for o in self.objects if o.is_past_bottom(HEIGHT)]
         if missed:
             self.objects = [
                 o for o in self.objects if not o.is_past_bottom(HEIGHT)]
-            self.misses += len(missed)
+            missed_contactable = [o for o in missed if o.is_contactable]
+            self.misses += len(missed_contactable)
             if self.misses >= MAX_MISSES:
                 self.game_over = True
 
+            for _ in missed:
+                self._spawn_object()
+
+        self.cracked_objects = [
+            obj for obj in self.cracked_objects
+            if not obj.is_past_bottom(HEIGHT)
+        ]
+
     def draw(self, surface, font):
         from game import renderer
-        renderer.draw_scene(surface, self.basket, self.objects)
+        renderer.draw_scene(
+            surface, self.basket, self.objects, self.cracked_objects)
         renderer.draw_text(surface, font, f"Score: {self.score}", (10, 10))
         renderer.draw_text(
             surface, font, f"Misses: {self.misses}/{MAX_MISSES}", (10, 36))

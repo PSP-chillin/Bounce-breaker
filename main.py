@@ -14,7 +14,8 @@ from game.renderer import WINDOW_SIZE
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode(WINDOW_SIZE)
+    screen = pygame.display.set_mode(
+        WINDOW_SIZE, pygame.FULLSCREEN | pygame.SCALED)
     pygame.display.set_caption("Bounce Breaker")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("consolas", 22)
@@ -26,7 +27,10 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                engine.handle_keydown(event.key)
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                else:
+                    engine.handle_keydown(event.key)
 
         keys = pygame.key.get_pressed()
         engine.handle_input(keys)
