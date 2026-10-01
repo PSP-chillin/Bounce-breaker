@@ -42,17 +42,17 @@ def main():
                 continue
 
             if settings_open:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                was_rebinding = settings.rebinding_action is not None
+                action = settings.handle_event(event)
+                if action == "close":
                     settings_open = False
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+                elif action == "quit":
+                    running = False
+                elif (event.type == pygame.KEYDOWN
+                      and event.key == pygame.K_f
+                      and not was_rebinding):
                     fullscreen = not fullscreen
                     screen = create_display(fullscreen)
-                else:
-                    action = settings.handle_event(event)
-                    if action == "quit":
-                        running = False
-                    elif action == "close":
-                        settings_open = False
                 continue
 
             if event.type == pygame.KEYDOWN:
@@ -79,7 +79,7 @@ def main():
 
         if game_started and not settings_open and not engine.game_over:
             keys = pygame.key.get_pressed()
-            engine.handle_input(keys)
+            engine.handle_input(keys, settings.keybinds)
             engine.update()
 
         if not game_started or engine.game_over:
