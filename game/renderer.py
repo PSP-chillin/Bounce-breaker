@@ -71,11 +71,36 @@ def draw_scene(surface, basket, objects, cracked_objects=None,
 
     for power_up in power_ups or []:
         rect = power_up.get_rect()
-        pygame.draw.rect(surface, power_up.color, rect, border_radius=5)
-        pygame.draw.rect(surface, COLOR_TEXT, rect, 2, border_radius=5)
-        label = pygame.font.Font(None, 22).render(
-            power_up.label, True, COLOR_TEXT)
-        surface.blit(label, label.get_rect(center=rect.center))
+        if power_up.power_type == "life":
+            center_x, center_y = rect.center
+            heart_color = power_up.color
+            pygame.draw.circle(
+                surface, heart_color,
+                (center_x - power_up.size // 2, center_y - power_up.size // 4),
+                power_up.size // 2,
+            )
+            pygame.draw.circle(
+                surface, heart_color,
+                (center_x + power_up.size // 2, center_y - power_up.size // 4),
+                power_up.size // 2,
+            )
+            pygame.draw.polygon(
+                surface, heart_color,
+                ((center_x - power_up.size, center_y - 2),
+                 (center_x + power_up.size, center_y - 2),
+                 (center_x, center_y + power_up.size)),
+            )
+            pygame.draw.line(
+                surface, COLOR_TEXT,
+                (center_x - power_up.size // 2, center_y - power_up.size // 3),
+                (center_x, center_y), 2,
+            )
+        else:
+            pygame.draw.rect(surface, power_up.color, rect, border_radius=5)
+            pygame.draw.rect(surface, COLOR_TEXT, rect, 2, border_radius=5)
+            label = pygame.font.Font(None, 22).render(
+                power_up.label, True, COLOR_TEXT)
+            surface.blit(label, label.get_rect(center=rect.center))
 
     for particle in particles or []:
         pygame.draw.circle(

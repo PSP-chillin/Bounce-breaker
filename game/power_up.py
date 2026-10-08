@@ -4,10 +4,11 @@ import pygame
 
 
 POWER_UP_TYPES = ("wide", "slow", "life")
+RANDOM_POWER_UP_TYPES = ("wide", "slow")
 POWER_UP_COLORS = {
     "wide": (80, 190, 255),
     "slow": (180, 130, 255),
-    "life": (255, 100, 130),
+    "life": (225, 35, 55),
 }
 POWER_UP_LABELS = {"wide": "W", "slow": "S", "life": "+"}
 

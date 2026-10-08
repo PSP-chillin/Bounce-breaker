@@ -12,7 +12,7 @@ from game.basket import Basket
 from game.falling_object import FallingObject
 from game.collision import is_caught
 from game.particle import Particle
-from game.power_up import POWER_UP_TYPES, PowerUp
+from game.power_up import RANDOM_POWER_UP_TYPES, PowerUp
 from game.renderer import WIDTH, HEIGHT
 from game.sound import SoundEffects
 from assets.catalog import BALL_ASSETS, BACKGROUND_ASSETS, BASKET_ASSETS
@@ -24,15 +24,20 @@ POWER_UP_DROP_CHANCE = 0.15
 
 
 class GameEngine:
-    def __init__(self, background_index=0):
-        basket_asset = BASKET_ASSETS[0]
+    def __init__(self, background_index=None, basket_index=None):
+        if background_index is None:
+            background_index = random.randrange(len(BACKGROUND_ASSETS))
+        if basket_index is None:
+            basket_index = random.randrange(len(BASKET_ASSETS))
+
+        basket_asset = BASKET_ASSETS[basket_index % len(BASKET_ASSETS)]
         self.basket = Basket(
             x=WIDTH / 2, y=HEIGHT - 30,
             width=basket_asset["width"], height=basket_asset["height"],
             speed=basket_asset["speed"], color=basket_asset["color"],
         )
-        self.background = BACKGROUND_ASSETS[background_index % len(
-            BACKGROUND_ASSETS)]
+        self.background = BACKGROUND_ASSETS[
+            background_index % len(BACKGROUND_ASSETS)]
         self.objects = []
         self.cracked_objects = []
         self.power_ups = []
@@ -42,6 +47,7 @@ class GameEngine:
         self.score = 0
         self.combo = 0
         self.misses = 0
+        self.balls_since_heart = 0
         self.lives = MAX_LIVES
         self.slow_frames = 0
         self.game_over = False
@@ -74,11 +80,26 @@ class GameEngine:
             bounce_multiplier=asset["bounce_multiplier"],
             break_speed=asset["break_speed"],
         ))
+        self._record_fallen_balls(1)
         if self.slow_frames > 0:
             self.objects[-1].speed_factor = 0.65
         if len(self.power_ups) < 2 and random.random() < POWER_UP_DROP_CHANCE:
-            power_type = random.choice(POWER_UP_TYPES)
+            power_type = random.choice(RANDOM_POWER_UP_TYPES)
             self.power_ups.append(PowerUp(x=x, y=-14, power_type=power_type))
+
+    def _spawn_heart(self):
+        heart_exists = any(
+            power_up.power_type == "life" for power_up in self.power_ups)
+        if self.lives < MAX_LIVES and not heart_exists:
+            self.power_ups.append(PowerUp(
+                x=random.randint(30, WIDTH - 30), y=-16, power_type="life"
+            ))
+
+    def _record_fallen_balls(self, count):
+        self.balls_since_heart += count
+        while self.balls_since_heart >= 15:
+            self.balls_since_heart -= 15
+            self._spawn_heart()
 
     def _add_particles(self, x, y, color, count=8):
         for _ in range(count):
@@ -204,7 +225,7 @@ class GameEngine:
                 # Several balls can cross the boundary in one frame; treat
                 # that as one miss event so one frame cannot drain several lives.
                 self.misses += 1
-                self.lives = max(0, MAX_LIVES - self.misses)
+                self.lives = max(0, self.lives - 1)
                 self.combo = 0
                 self.sounds.play("miss")
                 if self.lives <= 0:
