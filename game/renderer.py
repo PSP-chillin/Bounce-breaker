@@ -8,7 +8,7 @@ WIDTH, HEIGHT = 700, 500
 WINDOW_SIZE = (WIDTH, HEIGHT)
 
 COLOR_BG = (0, 0, 0)
-COLOR_BASKET = (150, 110, 70)
+COLOR_PADDLE = (150, 110, 70)
 COLOR_TEXT = (255, 255, 255)
 
 
@@ -46,7 +46,7 @@ def draw_background(surface, background):
             pygame.draw.circle(surface, accent, (x, y), 2)
 
 
-def draw_scene(surface, basket, objects, cracked_objects=None,
+def draw_scene(surface, paddle, objects, cracked_objects=None,
                power_ups=None, particles=None, background=None):
     draw_background(surface, background)
     for obj in (*objects, *(cracked_objects or [])):
@@ -107,7 +107,7 @@ def draw_scene(surface, basket, objects, cracked_objects=None,
             surface, particle.color,
             (int(particle.x), int(particle.y)), particle.radius)
 
-    pygame.draw.rect(surface, basket.color, basket.get_rect(), border_radius=6)
+    pygame.draw.rect(surface, paddle.color, paddle.get_rect(), border_radius=6)
     pygame.draw.rect(
         surface, COLOR_TEXT, (0, 0, WIDTH - 1, HEIGHT - 1), 2)
 

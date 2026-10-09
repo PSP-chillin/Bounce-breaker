@@ -3,7 +3,7 @@ Bounce Breaker
 
 Run with:  python3 main.py
 
-Controls: Left/Right arrows to move the basket, P to pause.
+Controls: Left/Right arrows to move the paddle, P to pause.
 """
 
 import pygame

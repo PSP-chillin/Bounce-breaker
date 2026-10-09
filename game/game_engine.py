@@ -1,21 +1,21 @@
 """
-GameEngine: owns the basket and all falling objects.
+GameEngine: owns the paddle and all falling objects.
 
-The engine handles basket movement, object spawning, speed changes, and
+The engine handles paddle movement, object spawning, speed changes, and
 collision detection for Bounce Breaker.
 """
 
 import random
 import pygame
 
-from game.basket import Basket
+from game.paddle import Paddle
 from game.falling_object import FallingObject
 from game.collision import is_caught
 from game.particle import Particle
 from game.power_up import RANDOM_POWER_UP_TYPES, PowerUp
 from game.renderer import WIDTH, HEIGHT
 from game.sound import SoundEffects
-from assets.catalog import BALL_ASSETS, BACKGROUND_ASSETS, BASKET_ASSETS
+from assets.catalog import BALL_ASSETS, BACKGROUND_ASSETS, PADDLE_ASSETS
 
 SPAWN_INTERVAL_FRAMES = 50
 MAX_LIVES = 5
@@ -24,17 +24,17 @@ POWER_UP_DROP_CHANCE = 0.15
 
 
 class GameEngine:
-    def __init__(self, background_index=None, basket_index=None):
+    def __init__(self, background_index=None, paddle_index=None):
         if background_index is None:
             background_index = random.randrange(len(BACKGROUND_ASSETS))
-        if basket_index is None:
-            basket_index = random.randrange(len(BASKET_ASSETS))
+        if paddle_index is None:
+            paddle_index = random.randrange(len(PADDLE_ASSETS))
 
-        basket_asset = BASKET_ASSETS[basket_index % len(BASKET_ASSETS)]
-        self.basket = Basket(
+        paddle_asset = PADDLE_ASSETS[paddle_index % len(PADDLE_ASSETS)]
+        self.paddle = Paddle(
             x=WIDTH / 2, y=HEIGHT - 30,
-            width=basket_asset["width"], height=basket_asset["height"],
-            speed=basket_asset["speed"], color=basket_asset["color"],
+            width=paddle_asset["width"], height=paddle_asset["height"],
+            speed=paddle_asset["speed"], color=paddle_asset["color"],
         )
         self.background = BACKGROUND_ASSETS[
             background_index % len(BACKGROUND_ASSETS)]
@@ -110,7 +110,7 @@ class GameEngine:
 
     def _activate_power_up(self, power_up):
         if power_up.power_type == "wide":
-            self.basket.activate_wide()
+            self.paddle.activate_wide()
         elif power_up.power_type == "slow":
             self.slow_frames = max(self.slow_frames, 360)
             for obj in self.objects:
@@ -128,19 +128,19 @@ class GameEngine:
             "left": pygame.K_LEFT,
             "right": pygame.K_RIGHT,
         }
-        move_speed = self.basket.current_speed
+        move_speed = self.paddle.current_speed
 
         if keys_pressed[keybinds.get("left", pygame.K_LEFT)]:
-            self.basket.x -= move_speed
+            self.paddle.x -= move_speed
         if keys_pressed[keybinds.get("right", pygame.K_RIGHT)]:
-            self.basket.x += move_speed
+            self.paddle.x += move_speed
 
-        half_width = self.basket.width / 2
-        self.basket.x = max(half_width, min(WIDTH - half_width, self.basket.x))
+        half_width = self.paddle.width / 2
+        self.paddle.x = max(half_width, min(WIDTH - half_width, self.paddle.x))
 
     def handle_keydown(self, key):
         if key == pygame.K_SPACE:
-            self.basket.activate_boost()
+            self.paddle.activate_boost()
         if self.game_over and key == pygame.K_r:
             self.__init__()
 
@@ -148,7 +148,7 @@ class GameEngine:
         if self.game_over:
             return
 
-        self.basket.update_effects()
+        self.paddle.update_effects()
         if self.slow_frames > 0:
             self.slow_frames -= 1
             if self.slow_frames == 0:
@@ -174,10 +174,10 @@ class GameEngine:
         self.particles = [
             particle for particle in self.particles if particle.alive]
 
-        basket_rect = self.basket.get_rect()
+        paddle_rect = self.paddle.get_rect()
         caught_power_ups = [
             power_up for power_up in self.power_ups
-            if basket_rect.colliderect(power_up.get_rect())
+            if paddle_rect.colliderect(power_up.get_rect())
         ]
         for power_up in caught_power_ups:
             self._activate_power_up(power_up)
@@ -189,10 +189,10 @@ class GameEngine:
 
         cracked_this_frame = []
         for obj in self.objects:
-            if is_caught(basket_rect, obj):
+            if is_caught(paddle_rect, obj):
                 hit_offset = (
-                    (obj.x - basket_rect.centerx)
-                    / (basket_rect.width / 2)
+                    (obj.x - paddle_rect.centerx)
+                    / (paddle_rect.width / 2)
                 )
                 hit_offset = max(-1.0, min(1.0, hit_offset))
                 horizontal_velocity = hit_offset * max(3.0, obj.speed * 1.5)
@@ -242,7 +242,7 @@ class GameEngine:
     def draw(self, surface, font):
         from game import renderer
         renderer.draw_scene(
-            surface, self.basket, self.objects, self.cracked_objects,
+            surface, self.paddle, self.objects, self.cracked_objects,
             self.power_ups, self.particles, self.background)
         renderer.draw_text(surface, font, f"Score: {self.score}", (10, 10))
         renderer.draw_text(
@@ -250,14 +250,14 @@ class GameEngine:
         renderer.draw_text(
             surface, font, f"Combo: x{self.combo}", (10, 62))
 
-        if self.basket.boosted_frames > 0:
+        if self.paddle.boosted_frames > 0:
             renderer.draw_text(surface, font, "BOOST!",
                                (10, 88), (80, 255, 180))
         else:
             renderer.draw_text(surface, font, "Normal speed",
                                (10, 88), (220, 220, 220))
 
-        if self.basket.wide_frames > 0:
+        if self.paddle.wide_frames > 0:
             renderer.draw_text(surface, font, "WIDE BAR",
                                (10, 114), (80, 190, 255))
         if self.slow_frames > 0:

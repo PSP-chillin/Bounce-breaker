@@ -1,9 +1,9 @@
-"""A ball that can bounce on the basket before cracking."""
+"""A ball that can bounce on the paddle before cracking."""
 
 
 class FallingObject:
-    def __init__(self, x, y, radius=14, speed=3, color=(230, 140, 60),
-                 velocity_x=0.0, gravity=0.02, bounce_multiplier=1.2,
+    def __init__(self, x, y, radius=14, speed=2, color=(230, 140, 60),
+                 velocity_x=0.0, gravity=0.01, bounce_multiplier=1.5,
                  break_speed=2.0):
         self.x = x
         self.y = y
@@ -29,7 +29,7 @@ class FallingObject:
             self.crack(break_direction)
             return
 
-        self.velocity_y = -max(3.5, self.speed * self.bounce_multiplier)
+        self.velocity_y = -max(3.0, self.speed * self.bounce_multiplier)
         if horizontal_velocity is not None:
             self.velocity_x = horizontal_velocity
 

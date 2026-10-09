@@ -1,26 +1,22 @@
-"""Procedural catalogs for baskets, balls, and backgrounds.
-
-The game keeps these as data instead of requiring hundreds of binary image
-files. Each entry has a stable id and can be selected by index later.
-"""
+"""Procedural catalogs for Paddles, balls, and backgrounds"""
 
 from colorsys import hsv_to_rgb
 
 
-def _color(hue, saturation=0.72, value=0.92):
+def _color(hue, saturation=0.75, value=0.90):
     red, green, blue = hsv_to_rgb(hue % 1.0, saturation, value)
     return tuple(int(channel * 255) for channel in (red, green, blue))
 
 
-BASKET_STYLES = (
+PADDLE_STYLES = (
     "classic", "sport", "carbon", "candy", "sunset",
     "mint", "royal", "electric", "sand", "mono",
 )
 
-BASKET_ASSETS = [
+PADDLE_ASSETS = [
     {
-        "id": f"basket_{index + 1:03d}",
-        "style": BASKET_STYLES[index // 10],
+        "id": f"paddle_{index + 1:03d}",
+        "style": PADDLE_STYLES[index // 10],
         "color": _color(index / 100),
         "width": 120 + (index % 5) * 4,
         "height": 22 + (index % 3) * 2,
@@ -93,6 +89,6 @@ BACKGROUND_ASSETS = [
 ]
 
 
-assert len(BASKET_ASSETS) == 100
+assert len(PADDLE_ASSETS) == 100
 assert len(BALL_ASSETS) == 100
 assert len(BACKGROUND_ASSETS) == 20

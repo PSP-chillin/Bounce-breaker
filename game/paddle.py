@@ -1,12 +1,10 @@
-"""
-Basket: the player-controlled bar at the bottom of the screen.
-"""
+"""Paddle: the player-controlled bar at the bottom of the screen."""
 
 import pygame
 
 
-class Basket:
-    def __init__(self, x, y, width=120, height=24, speed=7.5,
+class Paddle:
+    def __init__(self, x, y, width=150, height=20, speed=10.0,
                  color=(150, 110, 70)):
         self.x = x
         self.y = y
@@ -19,7 +17,7 @@ class Basket:
         self.wide_frames = 0
         self.target_width = self.width
         self.normal_speed = self.speed
-        self.boost_speed = self.speed * 1.8
+        self.boost_speed = self.speed * 1.5
 
     @property
     def current_speed(self):
