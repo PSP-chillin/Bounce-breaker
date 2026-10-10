@@ -6,6 +6,9 @@ Run with:  python3 main.py
 Controls: Left/Right arrows to move the paddle, P to pause.
 """
 
+import asyncio
+import sys
+
 import pygame
 
 from game.game_engine import GameEngine
@@ -20,9 +23,9 @@ def create_display(fullscreen):
     return pygame.display.set_mode(WINDOW_SIZE, flags)
 
 
-def main():
+async def main():
     pygame.init()
-    fullscreen = True
+    fullscreen = sys.platform != "emscripten"
     screen = create_display(fullscreen)
     pygame.display.set_caption("Bounce Breaker")
     clock = pygame.time.Clock()
@@ -95,9 +98,10 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
 
     pygame.quit()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

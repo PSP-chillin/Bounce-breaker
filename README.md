@@ -13,6 +13,17 @@ python main.py
 
 Controls: use the Left and Right arrow keys to move the bar.
 
+## Build for itch.io
+
+Install Pygbag and build the browser package:
+
+```powershell
+python -m pip install pygbag
+python -m pygbag --build main.py
+```
+
+Upload the contents of `build/web` as an **HTML** game on itch.io.
+
 ## Project structure
 
 ```text
